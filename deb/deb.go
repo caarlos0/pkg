@@ -262,9 +262,19 @@ func createEmptyFoldersInsideTarGz(info *nfpm.Info, out *tar.Writer, created map
 		// this .nope is actually not created, because createTree ignore the
 		// last part of the path, assuming it is a file.
 		// TODO: should probably refactor this
-		if err := createTree(out, files.ToNixPath(filepath.Join(folder, ".nope")), created); err != nil {
+		folder := folder.WithFolderInfoDefaults()
+		if err := createTree(out, files.ToNixPath(filepath.Dir(folder.Path)), created); err != nil {
 			return err
 		}
+		out.WriteHeader(&tar.Header{
+			Name:     files.ToNixPath(filepath.Join(folder.Path)),
+			Mode:     int64(folder.Mode),
+			ModTime:  folder.MTime,
+			Format:   tar.FormatGNU,
+			Uname:    folder.Owner,
+			Gname:    folder.Group,
+			Typeflag: tar.TypeDir,
+		})
 	}
 	return nil
 }

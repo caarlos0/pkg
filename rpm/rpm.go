@@ -318,13 +318,14 @@ func addScriptFiles(info *nfpm.Info, rpm *rpmpack.RPM) error {
 
 func addEmptyDirsRPM(info *nfpm.Info, rpm *rpmpack.RPM) {
 	for _, dir := range info.EmptyFolders {
+		dir := dir.WithFolderInfoDefaults()
 		rpm.AddFile(
 			rpmpack.RPMFile{
-				Name:  dir,
-				Mode:  uint(0o40755),
-				MTime: uint32(time.Now().Unix()),
-				Owner: "root",
-				Group: "root",
+				Name:  dir.Path,
+				Mode:  uint(dir.Mode),
+				MTime: uint32(dir.MTime.Unix()),
+				Owner: dir.Owner,
+				Group: dir.Group,
 			},
 		)
 	}
