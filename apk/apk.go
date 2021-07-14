@@ -470,8 +470,10 @@ func copyToTarAndDigest(file *files.Content, tw *tar.Writer, sizep *int64) error
 	if err != nil {
 		return err
 	}
-
+	header.Format = tar.FormatGNU
 	header.Name = files.ToNixPath(file.Destination[1:])
+	header.Uname = file.FileInfo.Owner
+	header.Gname = file.FileInfo.Group
 	if err = newItemInsideTarGz(tw, contents, header); err != nil {
 		return err
 	}
@@ -484,11 +486,20 @@ func createEmptyFoldersInsideTarGz(info *nfpm.Info, out *tar.Writer, created map
 	for _, folder := range info.EmptyFolders {
 		// this .nope is actually not created, because createTree ignore the
 		// last part of the path, assuming it is a file.
-		// TODO: handle dir's metadata
 		// TODO: should probably refactor this
-		if err := createTree(out, files.ToNixPath(filepath.Join(folder.Path, ".nope")), created); err != nil {
+		folder := folder.WithFolderInfoDefaults()
+		if err := createTree(out, files.ToNixPath(filepath.Join(filepath.Dir(folder.Path), ".nope")), created); err != nil {
 			return err
 		}
+		out.WriteHeader(&tar.Header{
+			Name:     files.ToNixPath(filepath.Join(folder.Path)),
+			Mode:     int64(folder.Mode),
+			ModTime:  folder.MTime,
+			Format:   tar.FormatGNU,
+			Uname:    folder.Owner,
+			Gname:    folder.Group,
+			Typeflag: tar.TypeDir,
+		})
 	}
 	return nil
 }
