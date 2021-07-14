@@ -263,7 +263,7 @@ func createEmptyFoldersInsideTarGz(info *nfpm.Info, out *tar.Writer, created map
 		// last part of the path, assuming it is a file.
 		// TODO: should probably refactor this
 		folder := folder.WithFolderInfoDefaults()
-		if err := createTree(out, files.ToNixPath(filepath.Dir(folder.Path)), created); err != nil {
+		if err := createTree(out, files.ToNixPath(filepath.Join(filepath.Dir(folder.Path), ".nope")), created); err != nil {
 			return err
 		}
 		out.WriteHeader(&tar.Header{
