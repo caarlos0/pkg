@@ -318,7 +318,6 @@ func addScriptFiles(info *nfpm.Info, rpm *rpmpack.RPM) error {
 
 func addEmptyDirsRPM(info *nfpm.Info, rpm *rpmpack.RPM) {
 	for _, dir := range info.EmptyFolders {
-		dir := dir.WithFolderInfoDefaults()
 		rpm.AddFile(
 			rpmpack.RPMFile{
 				Name:  dir.Path,
